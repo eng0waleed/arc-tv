@@ -1,0 +1,6 @@
+NotoKufiArabic-Bold.ttf
+NotoKufiArabic-Regular.ttf
+NotoNaskhArabic-Bold.ttf
+NotoNaskhArabic-Regular.ttf
+NotoSansArabic-Bold.ttf
+NotoSansArabic-Regular.ttf

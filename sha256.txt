@@ -1,0 +1,2 @@
+eca841fbcd08f3413ece89fca98f415f0f0c5b6291766c8f821ea9f65d2bc21e  dist/arc-tv-1.2.0-tv.6.apk
+eca841fbcd08f3413ece89fca98f415f0f0c5b6291766c8f821ea9f65d2bc21e  dist/arc.apk

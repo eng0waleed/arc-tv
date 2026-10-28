@@ -1,0 +1,10 @@
+
+✅ Jeddah 26 Oct 2026 matches the Umm al-Qura sanity check
+✅ Umm al-Qura Hijri dates
+✅ Ramadan moves Isha to Maghrib + 120 min, only for Umm al-Qura
+✅ Hijri adjustment shifts the Ramadan rule
+✅ Hanafi Asr is later than standard Asr
+✅ Status: adhan window, countdown and day boundaries
+✅ Every city computes a full, ordered year of times
+
+🎉 7 tests passed.

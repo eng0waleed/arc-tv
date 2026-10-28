@@ -1,0 +1,2 @@
+Using the existing signing key from the signing branch
+Certificate fingerprint (SHA-256): 51:A5:8F:21:9C:6A:CF:8B:6F:36:B8:AA:C3:6A:34:E1:97:34:75:68:CB:30:D4:54:BE:CE:7E:7C:6F:E1:BC:61

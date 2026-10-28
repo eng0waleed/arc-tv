@@ -1,0 +1,8 @@
+run=6
+sha=cf75984288512caf0b1baa72ab7741f1001c56ee
+signing=success signed=true
+pub=success
+analyze=success
+tests=success
+screens=success
+build=success

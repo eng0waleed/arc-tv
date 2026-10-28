@@ -1,0 +1,42 @@
+Running Gradle task 'assembleGithubRelease'...                  
+Checking the license for package NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/licenses
+License for package NDK (Side by side) 27.0.12077973 accepted.
+Preparing "Install NDK (Side by side) 27.0.12077973 v.27.0.12077973".
+"Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" ready.
+Installing NDK (Side by side) 27.0.12077973 in /usr/local/lib/android/sdk/ndk/27.0.12077973
+"Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" complete.
+"Install NDK (Side by side) 27.0.12077973 v.27.0.12077973" finished.
+Checking the license for package Android SDK Platform 31 in /usr/local/lib/android/sdk/licenses
+License for package Android SDK Platform 31 accepted.
+Preparing "Install Android SDK Platform 31 (revision 1)".
+"Install Android SDK Platform 31 (revision 1)" ready.
+Installing Android SDK Platform 31 in /usr/local/lib/android/sdk/platforms/android-31
+"Install Android SDK Platform 31 (revision 1)" complete.
+"Install Android SDK Platform 31 (revision 1)" finished.
+"es": 57 untranslated message(s).
+"tr": 57 untranslated message(s).
+To see a detailed report, use the untranslated-messages-file 
+option in the l10n.yaml file:
+untranslated-messages-file: desiredFileName.txt
+<other option>: <other selection> 
+
+
+This will generate a JSON format file containing all messages that 
+need to be translated.
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 19956 bytes (98.8% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Checking the license for package CMake 3.22.1 in /usr/local/lib/android/sdk/licenses
+License for package CMake 3.22.1 accepted.
+Preparing "Install CMake 3.22.1 v.3.22.1".
+"Install CMake 3.22.1 v.3.22.1" ready.
+Installing CMake 3.22.1 in /usr/local/lib/android/sdk/cmake/3.22.1
+"Install CMake 3.22.1 v.3.22.1" complete.
+"Install CMake 3.22.1 v.3.22.1" finished.
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Running Gradle task 'assembleGithubRelease'...                    152.7s
+✓ Built build/app/outputs/flutter-apk/app-github-release.apk (64.1MB)
+total 125136
+drwxr-xr-x  2 runner runner     4096 Oct 28 03:46 .
+drwxr-xr-x 16 runner runner     4096 Oct 28 03:46 ..
+-rw-r--r--  1 runner runner 64062745 Oct 28 03:46 arc-tv-1.2.0-tv.6.apk
+-rw-r--r--  1 runner runner 64062745 Oct 28 03:46 arc.apk
