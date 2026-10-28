@@ -230,6 +230,9 @@ Future<void> _shot(WidgetTester tester, String name) async {
 
 void main() {
   testWidgets('Arc TV screens', (tester) async {
+    // Tests draw BoxShadow without blur by default; real soft shadows here.
+    debugDisableShadows = false;
+    addTearDown(() => debugDisableShadows = true);
     await tester.runAsync(_loadFonts);
     tester.view.physicalSize = const Size(1920, 1080);
     tester.view.devicePixelRatio = 2.0;

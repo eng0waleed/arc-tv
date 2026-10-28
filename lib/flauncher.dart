@@ -346,7 +346,8 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
   double _dockExtent(BuildContext context, {required bool showAppNames}) {
     final contentWidth = MediaQuery.of(context).size.width - 2 * kLauncherSectionHorizontalPadding;
     final rowExtent = appCardRowExtentFromContentWidth(contentWidth) + (showAppNames ? kAppNameLabelHeight : 0);
-    return rowExtent + 24 /* glass tray padding */ + _kDockOuterPadding.vertical;
+    // Glass tray padding; without names, extra room under the row for the focused app's name.
+    return rowExtent + (showAppNames ? 24 : 42) + _kDockOuterPadding.vertical;
   }
 
   /// Height needed to fully show the first row of the first section below the dock.
@@ -597,10 +598,11 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
   }) {
     // Arc TV (tvOS HIG): the first row sits directly on the wallpaper, like the
     // tvOS Home top row — no frame or frosted box around it.
+    final showAppNames = context.select<SettingsService, bool>((s) => s.showAppNamesBelowIcons);
     return LiquidGlass(
       radius: 30,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        padding: EdgeInsets.fromLTRB(4, 12, 4, showAppNames ? 12 : 30),
         child: CategoryCleanRow(
           category: category,
           applications: apps,
