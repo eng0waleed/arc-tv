@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../kiosk/kiosk_page.dart';
+import '../providers/settings_service.dart';
 import '../widgets/rounded_switch_list_tile.dart';
 import '../widgets/settings/focusable_settings_tile.dart';
 import '../widgets/settings/settings_theme.dart';
@@ -82,6 +83,15 @@ class PrayerSettingsPage extends StatelessWidget {
                   child: Text(s.ramadanAuto, style: small),
                 ),
                 const SettingsSectionDivider(),
+                Consumer<SettingsService>(
+                  builder: (context, settings, _) => RoundedSwitchListTile(
+                    value: settings.reduceTransparency,
+                    onChanged: settings.setReduceTransparency,
+                    title: Text(s.reduceTransparency, style: body),
+                    subtitle: Text(s.reduceTransparencyHint, style: small),
+                    secondary: const Icon(Icons.blur_off_rounded),
+                  ),
+                ),
                 FocusableSettingsTile(
                   showChevron: true,
                   leading: const Icon(Icons.home_rounded),

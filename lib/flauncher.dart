@@ -29,6 +29,9 @@ import 'package:flauncher/providers/launcher_state.dart';
 import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/providers/watch_next_service.dart';
+import 'package:flauncher/ui/arc_wallpaper.dart';
+import 'package:flauncher/ui/home_hero.dart';
+import 'package:flauncher/ui/liquid_glass.dart';
 import 'package:flauncher/widgets/app_card.dart';
 import 'package:flauncher/widgets/cached_blur_backdrop.dart';
 import 'package:flauncher/widgets/category_clean_row.dart';
@@ -291,7 +294,7 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
             _firstSectionPeek(context, otherSections, showAppNames: showAppNames, showTitles: showCategoryTitles);
     final double heroSpace = max(
       0.0,
-      MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kToolbarHeight - bottomReserve,
+      MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kArcTopBarHeight - bottomReserve,
     );
 
     return CustomScrollView(
@@ -299,7 +302,7 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
       slivers: [
         if (favoriteApps.isNotEmpty || showWatchNextSection) ...[
           SliverToBoxAdapter(
-            child: SizedBox(height: heroSpace),
+            child: SizedBox(height: heroSpace, child: heroSpace > 170 ? const HomeHero() : null),
           ),
           if (showWatchNextSection)
             SliverToBoxAdapter(
@@ -343,7 +346,7 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
   double _dockExtent(BuildContext context, {required bool showAppNames}) {
     final contentWidth = MediaQuery.of(context).size.width - 2 * kLauncherSectionHorizontalPadding;
     final rowExtent = appCardRowExtentFromContentWidth(contentWidth) + (showAppNames ? kAppNameLabelHeight : 0);
-    return rowExtent + 10 /* dock vertical padding */ + _kDockOuterPadding.vertical;
+    return rowExtent + 24 /* glass tray padding */ + _kDockOuterPadding.vertical;
   }
 
   /// Height needed to fully show the first row of the first section below the dock.
@@ -383,7 +386,7 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
     if (!hasDock) {
       return 64;
     }
-    return MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kToolbarHeight;
+    return MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kArcTopBarHeight;
   }
 
   List<Widget> _buildSectionSlivers(
@@ -594,14 +597,17 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
   }) {
     // Arc TV (tvOS HIG): the first row sits directly on the wallpaper, like the
     // tvOS Home top row — no frame or frosted box around it.
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: CategoryCleanRow(
-        category: category,
-        applications: apps,
-        isFirstSection: handleUpNavigationToSettings,
-        scrollAlignment: 1.0,
-        onAppFocused: _onHomeSectionFocused,
+    return LiquidGlass(
+      radius: 30,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        child: CategoryCleanRow(
+          category: category,
+          applications: apps,
+          isFirstSection: handleUpNavigationToSettings,
+          scrollAlignment: 1.0,
+          onAppFocused: _onHomeSectionFocused,
+        ),
       ),
     );
   }
@@ -682,7 +688,7 @@ class _CachedGradientBackgroundState extends State<_CachedGradientBackground> {
     _rendering = true;
     final recorder = ui.PictureRecorder();
     final rect = Offset.zero & size;
-    Canvas(recorder).drawRect(rect, Paint()..shader = widget.gradient.createShader(rect));
+    paintWallpaperGradient(Canvas(recorder), rect, widget.gradient);
     final picture = recorder.endRecording();
     final image = picture.toImageSync(size.width.round(), size.height.round());
     picture.dispose();

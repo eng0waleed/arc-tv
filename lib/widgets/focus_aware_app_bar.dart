@@ -1,4 +1,5 @@
 import 'package:flauncher/prayer/prayer_pill.dart';
+import 'package:flauncher/ui/liquid_glass.dart';
 import 'package:flauncher/prayer/prayer_service.dart';
 import 'package:flauncher/widgets/settings/settings_panel.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,9 @@ import 'daily_wifi_usage_widget.dart';
 import 'date_time_widget.dart';
 import 'network_widget.dart';
 
+/// Arc TV: taller bar so the floating glass capsules and their shadows fit.
+const double kArcTopBarHeight = 84;
+
 class FocusAwareAppBar extends StatefulWidget implements PreferredSizeWidget
 {
   const FocusAwareAppBar({Key? key}) : super(key: key);
@@ -22,7 +26,7 @@ class FocusAwareAppBar extends StatefulWidget implements PreferredSizeWidget
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => Size.fromHeight(kArcTopBarHeight);
 }
 
 class FocusAwareAppBarState extends State<FocusAwareAppBar>
@@ -88,10 +92,10 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
                 child: AnimatedContainer(
                   curve: Curves.decelerate,
                   duration: const Duration(milliseconds: 200),
-                  height: isVisible ? kToolbarHeight : 0,
+                  height: isVisible ? kArcTopBarHeight : 0,
                   child: OverflowBox(
                     minHeight: 0,
-                    maxHeight: kToolbarHeight,
+                    maxHeight: kArcTopBarHeight,
                     alignment: Alignment.topCenter,
                     child: widget!,
                   ),
@@ -106,11 +110,18 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
           alignment: Alignment.center,
           children: [
         AppBar(
+          toolbarHeight: kArcTopBarHeight,
+          titleSpacing: 32,
           elevation: 0,
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           // Left side: Settings, Network indicator, WiFi usage
-          title: Row(
+          // Arc TV: the controls float on a Liquid Glass capsule.
+          title: LiquidGlass(
+            radius: 24,
+            child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+            child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Settings button
@@ -150,6 +161,8 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
                   : const SizedBox.shrink(),
               ),
             ],
+          ),
+            ),
           ),
           // Right side: Date/Time only
           actions: [

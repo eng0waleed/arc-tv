@@ -107,6 +107,11 @@ class SettingsService extends ChangeNotifier {
 
   bool get kioskMode => _sharedPreferences.getBool(_arcTvKioskMode) ?? false;
 
+  /// Arc TV: Apple's "Reduce Transparency" — solid materials instead of glass.
+  bool get reduceTransparency => _sharedPreferences.getBool("arc_tv_reduce_transparency") ?? false;
+
+  Future<void> setReduceTransparency(bool value) => set("arc_tv_reduce_transparency", value);
+
   Future<void> setKioskMode(bool value) async {
     await _sharedPreferences.setBool(_arcTvKioskMode, value);
     notifyListeners();
@@ -122,7 +127,7 @@ class SettingsService extends ChangeNotifier {
 
   bool get showDateInStatusBar => _sharedPreferences.getBool(_showDateInStatusBar) ?? false;
 
-  bool get showTimeInStatusBar => _sharedPreferences.getBool(_showTimeInStatusBar) ?? true;
+  bool get showTimeInStatusBar => _sharedPreferences.getBool(_showTimeInStatusBar) ?? false; // Arc TV: the home hero shows the time
 
   String? get gradientUuid => _sharedPreferences.getString(_gradientUuidKey);
 

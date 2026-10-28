@@ -21,6 +21,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flauncher/providers/wallpaper_service.dart';
+import 'package:flauncher/ui/arc_wallpaper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -185,7 +186,7 @@ abstract class _CachedBlurBackgroundState<T extends StatefulWidget> extends Stat
       if (source != null) {
         paintImage(canvas: canvas, rect: rect, image: source, fit: BoxFit.cover, filterQuality: FilterQuality.low);
       } else {
-        canvas.drawRect(rect, Paint()..shader = service.gradient.gradient.createShader(rect));
+        paintWallpaperGradient(canvas, rect, service.gradient.gradient);
       }
       canvas.restore();
 

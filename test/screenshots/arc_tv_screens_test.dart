@@ -59,6 +59,13 @@ Future<void> _loadFonts() async {
     '$materialFonts/Roboto-Bold.ttf',
   ]);
   await load('MaterialIcons', ['$materialFonts/MaterialIcons-Regular.otf']);
+  await load('IBMPlexSansArabic', [
+    'assets/fonts/IBMPlexSansArabic-Light.ttf',
+    'assets/fonts/IBMPlexSansArabic-Regular.ttf',
+    'assets/fonts/IBMPlexSansArabic-Medium.ttf',
+    'assets/fonts/IBMPlexSansArabic-SemiBold.ttf',
+    'assets/fonts/IBMPlexSansArabic-Bold.ttf',
+  ]);
   await load('ArabicUI', [
     '/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf',
     '/usr/share/fonts/truetype/noto/NotoSansArabic-Medium.ttf',
@@ -146,7 +153,7 @@ AppsService _appsService(Map<String, Uint8List> banners) {
 
 WallpaperService _wallpaperService() {
   final service = MockWallpaperService();
-  when(service.gradient).thenReturn(FLauncherGradients.arcNight);
+  when(service.gradient).thenReturn(FLauncherGradients.arcDusk);
   when(service.wallpaper).thenReturn(null);
   when(service.wallpaperVideoFile).thenReturn(null);
   when(service.wallpaperRevision).thenReturn(0);
@@ -176,8 +183,8 @@ MockFLauncherChannel _channel() {
 ThemeData _theme(Color accent) => ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      fontFamily: 'Roboto',
-      fontFamilyFallback: const ['ArabicUI'],
+      fontFamily: 'IBMPlexSansArabic',
+      fontFamilyFallback: const ['Roboto', 'ArabicUI'],
       colorScheme: ColorScheme.fromSeed(
         seedColor: accent,
         brightness: Brightness.dark,

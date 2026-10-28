@@ -86,6 +86,7 @@ class FLauncherApp extends StatelessWidget
         theme: ThemeData(
           useMaterial3: true,
           brightness: Brightness.dark,
+          fontFamily: 'IBMPlexSansArabic', // Arc TV
           // Use ColorScheme based on accent color
           colorScheme: ColorScheme.fromSeed(
             seedColor: accentColor,

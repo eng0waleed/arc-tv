@@ -20,6 +20,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 
+import 'ui/arc_wallpaper.dart';
+
 class FLauncherGradient {
   final String uuid;
   final String name;
@@ -84,7 +86,25 @@ mixin FLauncherGradients {
     ),
   );
 
-  // Arc TV: deep night-blue default that lets the gold prayer accents stand out.
+  // Arc TV: default "Liquid Glass" wallpaper — a dusk sky over Jeddah in soft lights.
+  static final arcDusk = FLauncherGradient(
+    "5d0b3f7e-9a61-4f2c-b8d4-6e1a2c7f9b30",
+    "Arc Dusk",
+    const ArcMeshGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [Color(0xFF141A3A), Color(0xFF1E1436)],
+      lights: [
+        MeshLight(Offset(0.12, 1.02), 0.62, Color(0xD9F08A4B)),
+        MeshLight(Offset(0.55, 1.10), 0.48, Color(0xB3D9577A)),
+        MeshLight(Offset(0.95, 0.70), 0.50, Color(0x99A04CC4)),
+        MeshLight(Offset(0.85, 0.02), 0.55, Color(0xB32C5BD6)),
+        MeshLight(Offset(0.05, 0.10), 0.40, Color(0x801A8FA0)),
+      ],
+    ),
+  );
+
+  // Arc TV: deep night-blue alternative.
   static final arcNight = FLauncherGradient(
     "a7c5f0e2-3b1d-4c8e-9f60-0d2b8e4a7c11",
     "Arc Night",
@@ -103,6 +123,7 @@ mixin FLauncherGradients {
   );
 
   static List<FLauncherGradient> get all => [
+        arcDusk,
         arcNight,
         pitchBlack,
         greatWhale,

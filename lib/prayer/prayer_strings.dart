@@ -95,6 +95,8 @@ class PrayerStrings {
   // ---- Settings page ----
   String get showOnHome => ar ? 'إظهار المواقيت في الشاشة الرئيسية' : 'Show prayer times on Home';
   String get city => ar ? 'المدينة' : 'City';
+  String get reduceTransparency => ar ? 'تقليل الشفافية' : 'Reduce transparency';
+  String get reduceTransparencyHint => ar ? 'زجاج معتم أسرع على أجهزة التلفاز الضعيفة' : 'Solid glass, lighter on slow TVs';
   String get hanafiAsr => ar ? 'العصر على المذهب الحنفي' : 'Hanafi Asr';
   String get hanafiAsrHint => ar ? 'مغلق = الجمهور (الشافعي)' : 'Off = standard (Shafi\'i)';
   String get arabicNames => ar ? 'الأسماء بالعربية' : 'Arabic names';

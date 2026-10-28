@@ -12,13 +12,14 @@ import 'prayer_service.dart';
 import 'prayer_settings_page.dart';
 import 'prayer_strings.dart';
 import 'prayer_theme.dart';
+import '../ui/liquid_glass.dart';
 
 Future<void> showPrayerSheet(BuildContext context) {
   return showGeneralDialog<void>(
     context: context,
     barrierDismissible: true,
     barrierLabel: 'prayer-times',
-    barrierColor: const Color(0xE6101012),
+    barrierColor: const Color(0xA6000000),
     transitionDuration: const Duration(milliseconds: 280),
     pageBuilder: (dialogContext, _, __) => PrayerSheet(
       onOpenSettings: () {
@@ -68,8 +69,12 @@ class PrayerSheet extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 45, vertical: 30),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 820),
-              child: ValueListenableBuilder<PrayerStatus?>(
+              constraints: const BoxConstraints(maxWidth: 860),
+              child: LiquidGlass(
+                radius: 44,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(36, 30, 36, 24),
+                  child: ValueListenableBuilder<PrayerStatus?>(
                 valueListenable: service.status,
                 builder: (context, status, _) {
                   if (status == null) {
@@ -84,6 +89,8 @@ class PrayerSheet extends StatelessWidget {
                     onOpenSettings: onOpenSettings,
                   );
                 },
+              ),
+                ),
               ),
             ),
           ),
@@ -141,7 +148,7 @@ class _SheetContent extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         Text(subtitle, style: const TextStyle(fontSize: 15, color: PrayerColors.secondaryLabel)),
-        const SizedBox(height: 22),
+        const SizedBox(height: 18),
         // Hero line: what is next and how long until it.
         if (current != null)
           Text(
@@ -183,9 +190,9 @@ class _SheetContent extends StatelessWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TvButton(icon: Icons.tune_rounded, label: strings.settings, onPressed: onOpenSettings),
+            GlassButton(icon: Icons.tune_rounded, label: strings.settings, onPressed: onOpenSettings),
             const SizedBox(width: 20),
-            TvButton(label: strings.close, autofocus: true, onPressed: () => Navigator.of(context).maybePop()),
+            GlassButton(label: strings.close, autofocus: true, onPressed: () => Navigator.of(context).maybePop()),
           ],
         ),
         const SizedBox(height: 18),

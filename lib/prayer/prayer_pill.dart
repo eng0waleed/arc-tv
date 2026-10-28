@@ -11,6 +11,7 @@ import 'prayer_service.dart';
 import 'prayer_sheet.dart';
 import 'prayer_strings.dart';
 import 'prayer_theme.dart';
+import '../ui/liquid_glass.dart';
 
 class PrayerPill extends StatefulWidget {
   final FocusNode? focusNode;
@@ -112,56 +113,58 @@ class _PillBody extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
       builder: (context, f, _) {
-        final restFill = isNow ? PrayerColors.gold : const Color(0xB31C1C1E);
-        final fill = Color.lerp(restFill, Colors.white, f)!;
-        final onFill = isNow || f > 0.5 ? const Color(0xFF111114) : Colors.white;
-        final secondary = onFill.withValues(alpha: 0.62);
+        final onFill = Color.lerp(Colors.white, const Color(0xFF111114), f)!;
+        final secondary = onFill.withValues(alpha: 0.66);
         final tabular = const [FontFeature.tabularFigures()];
 
-        final body = Container(
-          height: 42,
-          padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 18, 0),
-          decoration: BoxDecoration(
-            color: fill,
-            borderRadius: BorderRadius.circular(21),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.10 * (1 - f)), width: 1),
-            boxShadow: [
-              if (f > 0.01)
-                BoxShadow(color: Colors.black.withValues(alpha: 0.45 * f), blurRadius: 18 * f, offset: Offset(0, 8 * f)),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _AnimatedRing(progress: isNow ? 1.0 : status.progress, onLight: isNow || f > 0.5),
-              const SizedBox(width: 10),
-              Text(
-                strings.name(target.id),
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onFill, height: 1.1),
-              ),
-              const SizedBox(width: 10),
-              if (isNow)
-                Text(strings.nowLabel,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: secondary, height: 1.1))
-              else ...[
-                Text(
-                  strings.clock(target.local(city), use24h: use24h),
-                  style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w400, color: secondary, height: 1.1, fontFeatures: tabular),
-                ),
-                const SizedBox(width: 12),
-                RollingText(
-                  text: PrayerStrings.countdown(status.remaining),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: f > 0.5 ? onFill : PrayerColors.gold,
-                    height: 1.1,
-                    fontFeatures: tabular,
+        final body = LiquidGlass(
+          radius: 24,
+          focus: f,
+          tint: isNow ? PrayerColors.gold : null,
+          tintStrength: 0.55,
+          child: SizedBox(
+            height: 48,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(10, 0, 20, 0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _AnimatedRing(progress: isNow ? 1.0 : status.progress, onLight: f > 0.5),
+                  const SizedBox(width: 11),
+                  Text(
+                    strings.name(target.id),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: onFill, height: 1.1),
                   ),
-                ),
-              ],
-            ],
+                  const SizedBox(width: 10),
+                  if (isNow)
+                    Text(strings.nowLabel,
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500, color: onFill, height: 1.1))
+                  else ...[
+                    Text(
+                      strings.clock(target.local(city), use24h: use24h),
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w400, color: secondary, height: 1.1, fontFeatures: tabular),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 18,
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      color: onFill.withValues(alpha: 0.25),
+                    ),
+                    RollingText(
+                      text: PrayerStrings.countdown(status.remaining),
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: f > 0.5 ? onFill : PrayerColors.gold,
+                        height: 1.1,
+                        fontFeatures: tabular,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         );
 
@@ -275,7 +278,7 @@ class _AdhanGlowState extends State<_AdhanGlow> with SingleTickerProviderStateMi
         final t = Curves.easeInOut.transform(_pulse.value);
         return DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(21),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [BoxShadow(color: PrayerColors.gold.withValues(alpha: 0.25 + 0.35 * t), blurRadius: 8 + 8 * t)],
           ),
           child: child,

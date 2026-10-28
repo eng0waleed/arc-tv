@@ -263,6 +263,15 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                               ],
                             ),
                           ),
+                          // Arc TV: Liquid Glass edge on the focused tile — a lensing rim and
+                          // a specular sheen, like tvOS 26 app icons.
+                          IgnorePointer(
+                            child: AnimatedOpacity(
+                              duration: _focusAnimationDuration,
+                              opacity: shouldHighlight && !_moving ? 1 : 0,
+                              child: const CustomPaint(painter: _GlassTileRimPainter()),
+                            ),
+                          ),
                           if ((shouldHighlight && showFocusBorders) || _moving)
                             if (animationEnabled && !_moving)
                               IgnorePointer(
@@ -702,4 +711,52 @@ class _HighlightOutline extends StatelessWidget {
       child: const SizedBox.expand(),
     );
   }
+}
+
+/// Arc TV: specular rim and top sheen drawn over the focused app tile.
+class _GlassTileRimPainter extends CustomPainter {
+  const _GlassTileRimPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.isEmpty) return;
+    final rect = Offset.zero & size;
+    const radius = 12.0;
+    final clip = RRect.fromRectAndRadius(rect, const Radius.circular(radius));
+    canvas.save();
+    canvas.clipRRect(clip);
+    // Sheen across the top third.
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height * 0.45),
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white.withValues(alpha: 0.22), Colors.white.withValues(alpha: 0)],
+        ).createShader(Rect.fromLTWH(0, 0, size.width, size.height * 0.45)),
+    );
+    canvas.restore();
+    // Lensing rim, brightest at the top-left like light catching an edge.
+    final rim = rect.deflate(0.8);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rim, const Radius.circular(radius - 0.8)),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.6
+        ..shader = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.white.withValues(alpha: 0.95),
+            Colors.white.withValues(alpha: 0.25),
+            Colors.white.withValues(alpha: 0.12),
+            Colors.white.withValues(alpha: 0.55),
+          ],
+          stops: const [0.0, 0.35, 0.7, 1.0],
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _GlassTileRimPainter oldDelegate) => false;
 }
