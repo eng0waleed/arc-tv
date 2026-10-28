@@ -1,109 +1,43 @@
-// Arc TV: shared look for the prayer widgets (glass + soft gold).
+// Arc TV: shared look for the prayer widgets, following Apple's tvOS
+// Human Interface Guidelines (dark materials, white focus, restrained tint).
 //
-// Everything is drawn with plain gradients and strokes — no live backdrop blur —
+// Everything is drawn with plain fills and strokes — no live backdrop blur —
 // so it stays cheap on low-end TV GPUs.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
 class PrayerColors {
   PrayerColors._();
 
-  static const Color gold = Color(0xFFE9CB86);
-  static const Color goldDeep = Color(0xFFC79A4A);
-  static const Color goldGlow = Color(0xFFF2D79B);
-  static const Color ink = Color(0xFF0E1116);
+  /// The tint colour (soft gold), used sparingly like a tvOS accent.
+  static const Color gold = Color(0xFFE3BE6E);
+
+  /// tvOS dark materials and label colours.
+  static const Color material = Color(0xE61C1C1E);
+  static const Color materialRaised = Color(0x29FFFFFF);
+  static const Color label = Colors.white;
+  static const Color secondaryLabel = Color(0x99EBEBF5);
+  static const Color tertiaryLabel = Color(0x4DEBEBF5);
+  static const Color ink = Color(0xFF111114);
 }
 
-/// Paints a frosted-glass stadium/rounded surface with a specular hairline.
-class GlassSurfacePainter extends CustomPainter {
-  /// 0..1 — brighter fill and a gold hairline when focused.
-  final double focus;
-
-  /// 0..1 — warm gold tint used at adhan time.
-  final double warmth;
-  final double radius;
-
-  const GlassSurfacePainter({this.focus = 0, this.warmth = 0, this.radius = 999});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (size.isEmpty) return;
-    final rect = Offset.zero & size;
-    final r = math.min(radius, size.height / 2);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(r));
-
-    // Dark base keeps text readable over bright wallpapers.
-    canvas.drawRRect(rrect, Paint()..color = Color.lerp(const Color(0x66000000), const Color(0x7A000000), focus)!);
-
-    // Frosted fill: lighter at the top, like light catching glass.
-    final fillTop = Color.lerp(const Color(0x2EFFFFFF), const Color(0x47FFFFFF), focus)!;
-    final fillBottom = Color.lerp(const Color(0x0DFFFFFF), const Color(0x1AFFFFFF), focus)!;
-    canvas.drawRRect(
-      rrect,
-      Paint()
-        ..shader = ui.Gradient.linear(rect.topCenter, rect.bottomCenter, [fillTop, fillBottom]),
-    );
-
-    if (warmth > 0.001) {
-      canvas.drawRRect(
-        rrect,
-        Paint()
-          ..shader = ui.Gradient.linear(
-            rect.topCenter,
-            rect.bottomCenter,
-            [
-              PrayerColors.gold.withValues(alpha: 0.30 * warmth),
-              PrayerColors.goldDeep.withValues(alpha: 0.12 * warmth),
-            ],
-          ),
-      );
-    }
-
-    // Specular hairline: white at the top, gold through the middle.
-    final border = rect.deflate(0.6);
-    final borderRRect = RRect.fromRectAndRadius(border, Radius.circular(math.max(0, r - 0.6)));
-    final goldAmount = math.max(focus, warmth);
-    canvas.drawRRect(
-      borderRRect,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2
-        ..shader = ui.Gradient.linear(
-          border.topCenter,
-          border.bottomCenter,
-          [
-            Colors.white.withValues(alpha: 0.30 + 0.35 * focus),
-            Color.lerp(Colors.white.withValues(alpha: 0.10), PrayerColors.gold.withValues(alpha: 0.85), goldAmount)!,
-            Colors.white.withValues(alpha: 0.06 + 0.10 * focus),
-          ],
-          const [0.0, 0.55, 1.0],
-        ),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant GlassSurfacePainter old) =>
-      old.focus != focus || old.warmth != warmth || old.radius != radius;
-}
-
-/// Thin progress ring with a small crescent in the middle.
+/// Thin progress ring (previous prayer → next prayer) with a small crescent.
 class PrayerRingPainter extends CustomPainter {
   final double progress;
-  final double warmth;
 
-  PrayerRingPainter({required this.progress, this.warmth = 0});
+  /// Draw for a white (focused) background instead of dark material.
+  final bool onLight;
 
-  static Path? _cachedCrescent;
-  static Size? _cachedSize;
+  PrayerRingPainter({required this.progress, this.onLight = false});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = size.center(Offset.zero);
-    const stroke = 2.6;
+    const stroke = 2.4;
     final radius = size.shortestSide / 2 - stroke;
+    final ink = onLight ? PrayerColors.ink : PrayerColors.gold;
 
     canvas.drawCircle(
       center,
@@ -111,14 +45,13 @@ class PrayerRingPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = stroke
-        ..color = Colors.white.withValues(alpha: 0.18),
+        ..color = onLight ? const Color(0x26000000) : const Color(0x38FFFFFF),
     );
 
     final sweep = 2 * math.pi * progress.clamp(0.0, 1.0);
     if (sweep > 0.01) {
-      final arcRect = Rect.fromCircle(center: center, radius: radius);
       canvas.drawArc(
-        arcRect,
+        Rect.fromCircle(center: center, radius: radius),
         -math.pi / 2,
         sweep,
         false,
@@ -126,24 +59,86 @@ class PrayerRingPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = stroke
           ..strokeCap = StrokeCap.round
-          ..color = Color.lerp(PrayerColors.gold, PrayerColors.goldGlow, warmth)!,
+          ..color = ink,
       );
     }
 
-    if (_cachedCrescent == null || _cachedSize != size) {
-      final r = radius * 0.46;
-      final outer = Path()..addOval(Rect.fromCircle(center: center, radius: r));
-      final inner = Path()
-        ..addOval(Rect.fromCircle(center: center + Offset(r * 0.42, -r * 0.30), radius: r * 0.86));
-      _cachedCrescent = Path.combine(PathOperation.difference, outer, inner);
-      _cachedSize = size;
-    }
-    canvas.drawPath(
-      _cachedCrescent!,
-      Paint()..color = Color.lerp(PrayerColors.gold.withValues(alpha: 0.85), PrayerColors.goldGlow, warmth)!,
-    );
+    final r = radius * 0.46;
+    final outer = Path()..addOval(Rect.fromCircle(center: center, radius: r));
+    final inner = Path()..addOval(Rect.fromCircle(center: center + Offset(r * 0.42, -r * 0.30), radius: r * 0.86));
+    canvas.drawPath(Path.combine(PathOperation.difference, outer, inner), Paint()..color = ink);
   }
 
   @override
-  bool shouldRepaint(covariant PrayerRingPainter old) => old.progress != progress || old.warmth != warmth;
+  bool shouldRepaint(covariant PrayerRingPainter old) => old.progress != progress || old.onLight != onLight;
+}
+
+/// A tvOS-style button: dark material at rest; focused it lifts, scales up and
+/// turns white with dark text. OK activates it.
+class TvButton extends StatefulWidget {
+  final IconData? icon;
+  final String label;
+  final VoidCallback onPressed;
+  final bool autofocus;
+
+  const TvButton({super.key, this.icon, required this.label, required this.onPressed, this.autofocus = false});
+
+  @override
+  State<TvButton> createState() => _TvButtonState();
+}
+
+class _TvButtonState extends State<TvButton> {
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = _focused ? PrayerColors.ink : Colors.white;
+    return Actions(
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) {
+          widget.onPressed();
+          return null;
+        }),
+        ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) {
+          widget.onPressed();
+          return null;
+        }),
+      },
+      child: Focus(
+        autofocus: widget.autofocus,
+        onFocusChange: (focused) => setState(() => _focused = focused),
+        child: GestureDetector(
+          onTap: widget.onPressed,
+          child: AnimatedScale(
+            scale: _focused ? 1.1 : 1,
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              height: 46,
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              decoration: BoxDecoration(
+                color: _focused ? Colors.white : PrayerColors.materialRaised,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: _focused
+                    ? const [BoxShadow(color: Color(0x73000000), blurRadius: 18, offset: Offset(0, 8))]
+                    : const [],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.icon != null) ...[
+                    Icon(widget.icon, size: 19, color: fg),
+                    const SizedBox(width: 8),
+                  ],
+                  Text(widget.label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: fg)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

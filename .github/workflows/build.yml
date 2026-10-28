@@ -71,12 +71,12 @@ jobs:
           set -o pipefail
           sudo apt-get install -y -qq fonts-noto-core >/dev/null 2>&1 || true
           ls /usr/share/fonts/truetype/noto/ | grep -i arabic > ci-out/arabic-fonts.txt || true
-          flutter test --update-goldens test/screenshots 2>&1 | tee ci-out/screens.txt
+          flutter test test/screenshots 2>&1 | tee ci-out/screens.txt
       - name: Collect screenshots
         if: always()
         run: |
           mkdir -p ci-out/screens
-          cp test/screenshots/goldens/*.png ci-out/screens/ 2>/dev/null || true
+          cp build/arc_tv_screens/*.png ci-out/screens/ 2>/dev/null || true
           ls -la ci-out/screens
 
       # A stable signing key lets every new build install over the previous one.

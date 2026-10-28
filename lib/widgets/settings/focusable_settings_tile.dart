@@ -37,64 +37,39 @@ class FocusableSettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = Theme.of(context).colorScheme.primary;
     final baseTextStyle = Theme.of(context).textTheme.bodyMedium ?? const TextStyle(fontSize: 14);
-    // Icons get a tinted squircle behind them; arbitrary widgets (app icons,
-    // spinners) are rendered untouched.
-    final framedLeading = frameLeading && leading is Icon;
 
     return SettingsFocusCard(
       autofocus: autofocus,
       onPressed: onPressed,
-      builder: (context, highlighted) => DefaultTextStyle.merge(
-        style: baseTextStyle.copyWith(
-          color: highlighted ? Colors.white : Colors.white.withValues(alpha: 0.9),
-        ),
-        child: Row(
-          children: [
-            if (leading != null) ...[
-              if (framedLeading)
-                AnimatedContainer(
-                  duration: SettingsStyle.focusDurationFor(context),
-                  curve: Curves.easeOutCubic,
-                  width: SettingsStyle.iconChipSize,
-                  height: SettingsStyle.iconChipSize,
-                  decoration: BoxDecoration(
-                    color: highlighted
-                        ? accentColor.withValues(alpha: 0.22)
-                        : Colors.white.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(SettingsStyle.iconChipRadius),
-                    border: Border.all(
-                      color: highlighted
-                          ? Colors.white.withValues(alpha: 0.18)
-                          : Colors.white.withValues(alpha: 0.04),
-                    ),
-                  ),
-                  child: IconTheme.merge(
-                    data: IconThemeData(
-                      size: SettingsStyle.iconSize,
-                      color: highlighted ? Colors.white : Colors.white.withValues(alpha: 0.78),
-                    ),
-                    child: Center(child: leading!),
-                  ),
-                )
-              else
-                leading!,
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: subtitle != null
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        title,
-                        const SizedBox(height: 2),
-                        subtitle!,
-                      ],
-                    )
-                  : title,
+      builder: (context, highlighted) {
+        // Arc TV (tvOS HIG): the focused row is white, so its text and icons turn dark.
+        final content = DefaultTextStyle.merge(
+          style: baseTextStyle.copyWith(color: Colors.white),
+          child: IconTheme.merge(
+            data: IconThemeData(size: SettingsStyle.iconSize, color: Colors.white.withValues(alpha: 0.9)),
+            child: Row(
+              children: [
+                if (leading != null) ...[
+                  SizedBox(width: SettingsStyle.iconChipSize - 6, child: Center(child: leading!)),
+                  const SizedBox(width: 12),
+                ],
+                Expanded(
+                  child: subtitle != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [title, const SizedBox(height: 2), subtitle!],
+                        )
+                      : title,
+                ),
+              ],
             ),
+          ),
+        );
+        return Row(
+          children: [
+            Expanded(child: highlighted ? _DarkOnLight(child: content) : content),
             if (trailing != null) ...[
               const SizedBox(width: 12),
               trailing!,
@@ -102,15 +77,31 @@ class FocusableSettingsTile extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 20,
-                color: highlighted
-                    ? Colors.white.withValues(alpha: 0.85)
-                    : Colors.white.withValues(alpha: 0.25),
+                size: 22,
+                color: highlighted ? const Color(0x99000000) : Colors.white.withValues(alpha: 0.35),
               ),
             ],
           ],
-        ),
-      ),
+        );
+      },
     );
   }
+}
+
+/// Renders light content as dark (luminance inverted, colours removed), for
+/// text and icons sitting on a focused white row.
+class _DarkOnLight extends StatelessWidget {
+  final Widget child;
+
+  const _DarkOnLight({required this.child});
+
+  static const ColorFilter _filter = ColorFilter.matrix(<double>[
+    -0.299, -0.587, -0.114, 0, 255, //
+    -0.299, -0.587, -0.114, 0, 255, //
+    -0.299, -0.587, -0.114, 0, 255, //
+    0, 0, 0, 1, 0,
+  ]);
+
+  @override
+  Widget build(BuildContext context) => ColorFiltered(colorFilter: _filter, child: child);
 }

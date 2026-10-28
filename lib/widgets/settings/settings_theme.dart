@@ -33,16 +33,17 @@ abstract final class SettingsStyle {
   static const double iconSize = 20;
 
   /// Scale applied to the focused row (1.0 means no lift).
-  static const double focusScale = 1.018;
+  static const double focusScale = 1.035; // Arc TV: tvOS-style lift
 
   static const double panelWidth = 380;
   static const double panelRadius = 32;
 
-  static const Color panelTop = Color(0xFF2A2A2F);
-  static const Color panelBottom = Color(0xFF161618);
+  // Arc TV: tvOS dark material.
+  static const Color panelTop = Color(0xF7232326);
+  static const Color panelBottom = Color(0xF71C1C1E);
 
-  static const Color rowRestFill = Color(0x0AFFFFFF); // white @ 4%
-  static const Color rowFocusFill = Color(0x1CFFFFFF); // white @ 11%
+  static const Color rowRestFill = Color(0x14FFFFFF); // tvOS grouped-row fill
+  static const Color rowFocusFill = Color(0xFFF5F5F7); // tvOS focused row: white
 
   static Duration focusDurationFor(BuildContext context) {
     final reduceMotion =
@@ -291,59 +292,19 @@ class SettingsSurfacePainter extends CustomPainter {
     final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
     final t = progress.clamp(0.0, 1.0);
 
-    // Glass fill: slightly brighter when highlighted.
-    canvas.drawRRect(
-      rrect,
-      Paint()
-        ..color = Color.lerp(
-          SettingsStyle.rowRestFill,
-          SettingsStyle.rowFocusFill,
-          t,
-        )!,
-    );
-
-    // Accent wash, so focus picks up the user's accent color.
+    // Arc TV (tvOS HIG): focus lifts the row with a soft shadow and turns it white.
     if (t > 0.001) {
       canvas.drawRRect(
-        rrect,
-        Paint()..color = accentColor.withValues(alpha: 0.12 * t),
+        rrect.shift(Offset(0, 6 * t)),
+        Paint()
+          ..color = Colors.black.withValues(alpha: 0.35 * t)
+          ..maskFilter = MaskFilter.blur(BlurStyle.normal, 10 * t),
       );
     }
-
-    // Specular hairline: neutral at rest, white -> accent -> white on focus.
-    final borderRect = rect.deflate(0.5);
-    final borderRRect = RRect.fromRectAndRadius(
-      borderRect,
-      Radius.circular((radius - 0.5).clamp(0.0, double.infinity)),
+    canvas.drawRRect(
+      rrect,
+      Paint()..color = Color.lerp(SettingsStyle.rowRestFill, SettingsStyle.rowFocusFill, t)!,
     );
-    final white = Colors.white;
-    final borderPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..shader = LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        stops: const [0.0, 0.45, 1.0],
-        colors: [
-          Color.lerp(
-            white.withValues(alpha: 0.07),
-            white.withValues(alpha: 0.62),
-            t,
-          )!,
-          Color.lerp(
-            white.withValues(alpha: 0.04),
-            accentColor.withValues(alpha: 0.55),
-            t,
-          )!,
-          Color.lerp(
-            white.withValues(alpha: 0.07),
-            white.withValues(alpha: 0.26),
-            t,
-          )!,
-        ],
-      ).createShader(borderRect);
-
-    canvas.drawRRect(borderRRect, borderPaint);
   }
 
   @override

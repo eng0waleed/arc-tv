@@ -32,7 +32,7 @@ class SettingsSwitch extends StatelessWidget {
     // The knob must stay readable whatever accent the user picked.
     final lightTrack = accentColor.computeLuminance() > 0.55;
     final trackColor =
-        value ? accentColor : Colors.white.withValues(alpha: 0.16);
+        value ? accentColor : const Color(0x66787880); // Arc TV: iOS gray fill, visible on dark and white rows
     final borderColor = value
         ? (lightTrack
             ? Colors.black.withValues(alpha: 0.18)

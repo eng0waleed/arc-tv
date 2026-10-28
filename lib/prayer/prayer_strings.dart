@@ -81,7 +81,7 @@ class PrayerStrings {
     return '$h12:$minutes ${local.hour < 12 ? am : pm}';
   }
 
-  /// "1:05:09" above an hour, "05:09" below.
+  /// Always "H:MM:SS" (e.g. "0:21:05") so it never reads like a clock time.
   static String countdown(Duration remaining) {
     final total = remaining.isNegative ? 0 : remaining.inSeconds;
     final h = total ~/ 3600;
@@ -89,7 +89,7 @@ class PrayerStrings {
     final s = total % 60;
     final mm = m.toString().padLeft(2, '0');
     final ss = s.toString().padLeft(2, '0');
-    return h > 0 ? '$h:$mm:$ss' : '$mm:$ss';
+    return '$h:$mm:$ss';
   }
 
   // ---- Settings page ----

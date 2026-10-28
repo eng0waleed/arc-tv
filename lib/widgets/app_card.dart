@@ -106,7 +106,7 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   late final AnimationController _animation;
 
   late final CurvedAnimation _curvedAnimation;
-  static const double _focusedScale = 1.07;
+  static const double _focusedScale = 1.12; // Arc TV: tvOS-style focus lift
   static const Duration _focusAnimationDuration = Duration(milliseconds: 180);
 
   @override
@@ -219,11 +219,24 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
+                          // Arc TV (tvOS HIG): flat at rest; a soft shadow under the focused card.
+                          IgnorePointer(
+                            child: AnimatedOpacity(
+                              duration: _focusAnimationDuration,
+                              opacity: shouldHighlight ? 1 : 0,
+                              child: const DecoratedBox(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                                  boxShadow: [BoxShadow(color: Color(0x8C000000), blurRadius: 22, offset: Offset(0, 12))],
+                                ),
+                              ),
+                            ),
+                          ),
                           Material(
                             borderRadius: BorderRadius.circular(12),
                             clipBehavior: Clip.antiAlias,
-                            elevation: shouldHighlight ? 7 : 4,
-                            shadowColor: Colors.black,
+                            elevation: 0,
+                            color: const Color(0xFF2C2C2E),
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -315,10 +328,40 @@ class _AppCardState extends State<AppCard> with SingleTickerProviderStateMixin {
   }
 
   Widget _wrapAspectRatio(Widget child) {
-    if (widget.enforceAspectRatio) {
-      return AspectRatio(aspectRatio: kAppCardAspectRatio, child: child);
+    final Widget card = widget.enforceAspectRatio ? AspectRatio(aspectRatio: kAppCardAspectRatio, child: child) : child;
+    if (context.read<SettingsService>().showAppNamesBelowIcons) {
+      return card;
     }
-    return child;
+    // Arc TV (tvOS HIG): the app name appears under the focused app only.
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        card,
+        Positioned(
+          left: -24,
+          right: -24,
+          bottom: -27,
+          child: IgnorePointer(
+            child: AnimatedOpacity(
+              duration: _focusAnimationDuration,
+              opacity: !_moving && _shouldHighlight() ? 1 : 0,
+              child: Text(
+                widget.application.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  shadows: [Shadow(color: Color(0x99000000), blurRadius: 6)],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _appImage() {

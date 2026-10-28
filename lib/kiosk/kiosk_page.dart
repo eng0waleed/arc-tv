@@ -164,7 +164,8 @@ class _KioskPageState extends State<KioskPage> {
                       : const Icon(Icons.home_rounded),
                   title: Text(t('اجعل Arc الشاشة الرئيسية', 'Make Arc the Home screen'), style: body),
                   subtitle: Text(
-                      t('يعطّل واجهة Google TV (قابل للتراجع)', 'Turns off the Google TV home (reversible)'),
+                      t('يعطّل واجهة Google TV (قابل للتراجع). عند سؤال «السماح بتصحيح USB؟» اختر «السماح دائمًا» ثم «موافق».',
+                          'Turns off the Google TV home (reversible). When asked "Allow USB debugging?", choose "Always allow", then OK.'),
                       style: small),
                   onPressed: _busy ? null : () => _run(setup: true),
                 ),

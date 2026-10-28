@@ -92,6 +92,8 @@ const String ACCENT_COLOR_LIME = "AEEA00";
 const String ACCENT_COLOR_AMBER = "FFAB00";
 const String ACCENT_COLOR_ROSE = "FF4081";
 const String ACCENT_COLOR_ICE_BLUE = "80D8FF";
+// Arc TV: soft gold, the default accent.
+const String ACCENT_COLOR_GOLD = "E9CB86";
 
 class SettingsService extends ChangeNotifier {
   static final defaultDateFormat = "EEEE d";
@@ -136,7 +138,7 @@ class SettingsService extends ChangeNotifier {
 
   bool get showNetworkIndicatorInStatusBar => _sharedPreferences.getBool(_showNetworkIndicatorInStatusBar) ?? true;
 
-  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_WHITE;
+  String get accentColorHex => _sharedPreferences.getString(_accentColor) ?? ACCENT_COLOR_GOLD;
 
   String get screensaverClockStyle => _sharedPreferences.getString(_screensaverClockStyle) ?? "minimal";
 
@@ -157,7 +159,7 @@ class SettingsService extends ChangeNotifier {
 
   bool get dockShadowEnabled => _sharedPreferences.getBool(_dockShadowEnabled) ?? false;
 
-  bool get showFocusBorders => _sharedPreferences.getBool(_showFocusBorders) ?? true;
+  bool get showFocusBorders => _sharedPreferences.getBool(_showFocusBorders) ?? false; // Arc TV: tvOS has no focus outlines
 
   double get focusBorderThickness => _sharedPreferences.getDouble(_focusBorderThickness) ?? FOCUS_BORDER_DEFAULT;
 

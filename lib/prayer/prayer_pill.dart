@@ -105,84 +105,71 @@ class _PillBody extends StatelessWidget {
     final isNow = current != null;
     final target = current ?? status.next;
 
-    const nameStyle = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-      color: Colors.white,
-      height: 1.1,
-      shadows: [Shadow(color: Colors.black45, blurRadius: 4)],
-    );
-    final timeStyle = TextStyle(
-      fontSize: 15,
-      fontWeight: FontWeight.w500,
-      color: Colors.white.withValues(alpha: 0.78),
-      height: 1.1,
-      fontFeatures: const [FontFeature.tabularFigures()],
-    );
-    const goldStyle = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w700,
-      color: PrayerColors.gold,
-      height: 1.1,
-      fontFeatures: [FontFeature.tabularFigures()],
-    );
-
+    // tvOS HIG: a capsule on dark material at rest; when focused it lifts,
+    // scales up and turns white with dark text. Adhan time tints it gold.
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(end: focused ? 1 : 0),
-      duration: const Duration(milliseconds: 170),
+      duration: const Duration(milliseconds: 180),
       curve: Curves.easeOutCubic,
-      builder: (context, focus, child) => Transform.scale(
-        scale: 1 + 0.06 * focus,
-        child: _AdhanGlow(
-          active: isNow,
-          builder: (warmth) => CustomPaint(
-            painter: GlassSurfacePainter(focus: focus, warmth: warmth),
-            child: child,
+      builder: (context, f, _) {
+        final restFill = isNow ? PrayerColors.gold : const Color(0xB31C1C1E);
+        final fill = Color.lerp(restFill, Colors.white, f)!;
+        final onFill = isNow || f > 0.5 ? const Color(0xFF111114) : Colors.white;
+        final secondary = onFill.withValues(alpha: 0.62);
+        final tabular = const [FontFeature.tabularFigures()];
+
+        final body = Container(
+          height: 42,
+          padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 18, 0),
+          decoration: BoxDecoration(
+            color: fill,
+            borderRadius: BorderRadius.circular(21),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.10 * (1 - f)), width: 1),
+            boxShadow: [
+              if (f > 0.01)
+                BoxShadow(color: Colors.black.withValues(alpha: 0.45 * f), blurRadius: 18 * f, offset: Offset(0, 8 * f)),
+            ],
           ),
-        ),
-      ),
-      child: SizedBox(
-        height: 40,
-        child: Directionality(
-          textDirection: strings.direction,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(6, 6, 16, 6),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _AnimatedRing(progress: isNow ? 1.0 : status.progress, warm: isNow),
-                const SizedBox(width: 10),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 450),
-                  transitionBuilder: (child, animation) => FadeTransition(
-                    opacity: animation,
-                    child: SizeTransition(sizeFactor: animation, axis: Axis.horizontal, child: child),
-                  ),
-                  child: Text(strings.name(target.id), key: ValueKey(target.id), style: nameStyle),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _AnimatedRing(progress: isNow ? 1.0 : status.progress, onLight: isNow || f > 0.5),
+              const SizedBox(width: 10),
+              Text(
+                strings.name(target.id),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: onFill, height: 1.1),
+              ),
+              const SizedBox(width: 10),
+              if (isNow)
+                Text(strings.nowLabel,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: secondary, height: 1.1))
+              else ...[
+                Text(
+                  strings.clock(target.local(city), use24h: use24h),
+                  style: TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w400, color: secondary, height: 1.1, fontFeatures: tabular),
                 ),
-                const SizedBox(width: 10),
-                if (isNow)
-                  Text(strings.nowLabel, style: goldStyle)
-                else ...[
-                  Text(strings.clock(target.local(city), use24h: use24h), style: timeStyle),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Container(
-                      width: 4,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.35),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+                const SizedBox(width: 12),
+                RollingText(
+                  text: PrayerStrings.countdown(status.remaining),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: f > 0.5 ? onFill : PrayerColors.gold,
+                    height: 1.1,
+                    fontFeatures: tabular,
                   ),
-                  RollingText(text: PrayerStrings.countdown(status.remaining), style: goldStyle),
-                ],
+                ),
               ],
-            ),
+            ],
           ),
-        ),
-      ),
+        );
+
+        return Transform.scale(
+          scale: 1 + 0.08 * f,
+          child: _AdhanGlow(active: isNow && f < 0.5, child: body),
+        );
+      },
     );
   }
 }
@@ -191,9 +178,9 @@ class _PillBody extends StatelessWidget {
 /// changes), so it does not repaint continuously on a TV GPU.
 class _AnimatedRing extends StatefulWidget {
   final double progress;
-  final bool warm;
+  final bool onLight;
 
-  const _AnimatedRing({required this.progress, required this.warm});
+  const _AnimatedRing({required this.progress, required this.onLight});
 
   @override
   State<_AnimatedRing> createState() => _AnimatedRingState();
@@ -226,12 +213,12 @@ class _AnimatedRingState extends State<_AnimatedRing> with SingleTickerProviderS
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 28,
-      height: 28,
+      width: 26,
+      height: 26,
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, _) => CustomPaint(
-          painter: PrayerRingPainter(progress: _controller.value, warmth: widget.warm ? 1 : 0),
+          painter: PrayerRingPainter(progress: _controller.value, onLight: widget.onLight),
         ),
       ),
     );
@@ -241,9 +228,9 @@ class _AnimatedRingState extends State<_AnimatedRing> with SingleTickerProviderS
 /// Gentle pulsing gold glow while a prayer has just started ("حان الآن").
 class _AdhanGlow extends StatefulWidget {
   final bool active;
-  final Widget Function(double warmth) builder;
+  final Widget child;
 
-  const _AdhanGlow({required this.active, required this.builder});
+  const _AdhanGlow({required this.active, required this.child});
 
   @override
   State<_AdhanGlow> createState() => _AdhanGlowState();
@@ -252,15 +239,13 @@ class _AdhanGlow extends StatefulWidget {
 class _AdhanGlowState extends State<_AdhanGlow> with SingleTickerProviderStateMixin {
   late final AnimationController _pulse = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 1900),
+    duration: const Duration(milliseconds: 2000),
   );
 
   @override
   void initState() {
     super.initState();
-    if (widget.active) {
-      _pulse.repeat(reverse: true);
-    }
+    if (widget.active) _pulse.repeat(reverse: true);
   }
 
   @override
@@ -282,24 +267,18 @@ class _AdhanGlowState extends State<_AdhanGlow> with SingleTickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.active) {
-      return widget.builder(0);
-    }
+    if (!widget.active) return widget.child;
     return AnimatedBuilder(
       animation: _pulse,
-      builder: (context, _) {
+      child: widget.child,
+      builder: (context, child) {
         final t = Curves.easeInOut.transform(_pulse.value);
         return DecoratedBox(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: [
-              BoxShadow(
-                color: PrayerColors.gold.withValues(alpha: 0.18 + 0.30 * t),
-                blurRadius: 6 + 6 * t,
-              ),
-            ],
+            borderRadius: BorderRadius.circular(21),
+            boxShadow: [BoxShadow(color: PrayerColors.gold.withValues(alpha: 0.25 + 0.35 * t), blurRadius: 8 + 8 * t)],
           ),
-          child: widget.builder(0.55 + 0.45 * t),
+          child: child,
         );
       },
     );

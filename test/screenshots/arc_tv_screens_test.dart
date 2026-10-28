@@ -1,14 +1,13 @@
 // Arc TV: renders the real launcher screens at TV resolution (1920x1080) so the
 // build can publish screenshots. Run with:
-//   flutter test --update-goldens test/screenshots
-// The images are written to test/screenshots/goldens/.
+//   flutter test test/screenshots
+// The images are written to build/arc_tv_screens/.
 
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flauncher/flauncher.dart';
-import 'package:flauncher/flauncher_channel.dart';
 import 'package:flauncher/gradients.dart';
 import 'package:flauncher/kiosk/kiosk_page.dart';
 import 'package:flauncher/l10n/app_localizations.dart';
@@ -22,6 +21,7 @@ import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/providers/watch_next_service.dart';
 import 'package:flauncher/widgets/settings/settings_panel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -166,6 +166,13 @@ WatchNextService _watchNextService() {
   return service;
 }
 
+MockFLauncherChannel _channel() {
+  final channel = MockFLauncherChannel();
+  when(channel.getActiveNetworkInformation())
+      .thenAnswer((_) async => <String, dynamic>{'networkType': 1, 'internetAccess': true, 'wirelessSignalLevel': 4});
+  return channel;
+}
+
 ThemeData _theme(Color accent) => ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -182,10 +189,15 @@ ThemeData _theme(Color accent) => ThemeData(
       appBarTheme: const AppBarTheme(elevation: 0, backgroundColor: Colors.transparent),
     );
 
-Future<void> _settle(WidgetTester tester, {int frames = 8}) async {
-  // Let async image loading and decoding finish with real time, then pump frames.
-  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 250)));
-  for (var i = 0; i < frames; i++) {
+Future<void> _settle(WidgetTester tester) async {
+  // Image loading/decoding needs real time; alternate real waits with frames.
+  for (var round = 0; round < 3; round++) {
+    for (var i = 0; i < 4; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 300)));
+  }
+  for (var i = 0; i < 6; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
@@ -196,9 +208,17 @@ Future<void> _back(WidgetTester tester) async {
   await _settle(tester);
 }
 
+/// Captures the screen at full TV resolution (1920x1080) into build/arc_tv_screens/.
 Future<void> _shot(WidgetTester tester, String name) async {
   await _settle(tester);
-  await expectLater(find.byKey(_rootKey), matchesGoldenFile('goldens/$name.png'));
+  final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(_rootKey));
+  await tester.runAsync(() async {
+    final image = await boundary.toImage(pixelRatio: 2.0);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    final file = File('build/arc_tv_screens/$name.png');
+    file.parent.createSync(recursive: true);
+    file.writeAsBytesSync(data!.buffer.asUint8List());
+  });
 }
 
 void main() {
@@ -212,7 +232,7 @@ void main() {
 
     SharedPreferences.setMockInitialValues({
       'show_time_in_status_bar': false,
-      'show_app_names_below_icons': true,
+      'show_app_names_below_icons': false,
     });
     final prefs = await SharedPreferences.getInstance();
     final settings = SettingsService(prefs);
@@ -253,7 +273,7 @@ void main() {
           ChangeNotifierProvider<WatchNextService>.value(value: _watchNextService()),
           ChangeNotifierProvider<PrayerService>.value(value: prayer),
           ChangeNotifierProvider(create: (_) => LauncherState()),
-          ChangeNotifierProvider(create: (_) => NetworkService(FLauncherChannel())),
+          ChangeNotifierProvider(create: (_) => NetworkService(_channel())),
         ],
         child: RepaintBoundary(
           key: _rootKey,
@@ -268,7 +288,8 @@ void main() {
       ),
     );
 
-    // 1. Home screen, countdown to Asr (focus on the first app).
+    // 1. Home screen, countdown to Asr; the remote has moved focus to the second app.
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await _shot(tester, '01_home_countdown');
 
     // 2. Up from the first row lands on the prayer pill.

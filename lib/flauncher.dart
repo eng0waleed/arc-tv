@@ -33,7 +33,6 @@ import 'package:flauncher/widgets/app_card.dart';
 import 'package:flauncher/widgets/cached_blur_backdrop.dart';
 import 'package:flauncher/widgets/category_clean_row.dart';
 import 'package:flauncher/widgets/category_row.dart';
-import 'package:flauncher/widgets/dock_contour_painter.dart';
 import 'package:flauncher/widgets/launcher_alternative_view.dart';
 import 'package:flauncher/widgets/focus_aware_app_bar.dart';
 import 'package:flauncher/widgets/wallpaper_video_background.dart';
@@ -593,60 +592,16 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
     AppsService appsService, {
     required bool handleUpNavigationToSettings,
   }) {
-    final backdropDisabled = context.select<SettingsService, bool>((s) => s.dockBackdropFilterDisabled);
-    final darkBackground = context.select<SettingsService, bool>((s) => s.dockDarkBackground);
-    final shadowEnabled = context.select<SettingsService, bool>((s) => s.dockShadowEnabled);
-    final isBigPicture = context.select<SettingsService, bool>((s) => s.showWatchNextSection && s.watchNextBigPictureMode);
-
-    const dockBorderRadius = 24.0;
-    final borderRadius = BorderRadius.circular(dockBorderRadius);
-
-    final content = CustomPaint(
-      foregroundPainter: const DockContourPainter(radius: dockBorderRadius, strokeWidth: 1.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        decoration: BoxDecoration(
-          color: darkBackground
-              ? Colors.black.withValues(alpha: 0.35)
-              : (isBigPicture ? Colors.white.withValues(alpha: 0.16) : Colors.white.withValues(alpha: 0.1)),
-          borderRadius: borderRadius,
-        ),
-        child: CategoryCleanRow(
-          category: category,
-          applications: apps,
-          isFirstSection: handleUpNavigationToSettings,
-          scrollAlignment: 1.0,
-          onAppFocused: _onHomeSectionFocused,
-        ),
-      ),
-    );
-
-    return Center(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: borderRadius,
-          boxShadow: shadowEnabled
-              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 20, spreadRadius: 2)]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: borderRadius,
-          clipBehavior: Clip.antiAlias,
-          child: backdropDisabled
-              ? content
-              : ListenableBuilder(
-                  listenable: _heroBackdropBaker,
-                  child: content,
-                  builder: (_, child) {
-                    final dockBlur = _heroBackdropBaker.textures?.dockBlur;
-                    return CachedBlurBackdrop(
-                      sigma: 5,
-                      prebakedBlur: dockBlur,
-                      child: child!,
-                    );
-                  },
-                ),
-        ),
+    // Arc TV (tvOS HIG): the first row sits directly on the wallpaper, like the
+    // tvOS Home top row — no frame or frosted box around it.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: CategoryCleanRow(
+        category: category,
+        applications: apps,
+        isFirstSection: handleUpNavigationToSettings,
+        scrollAlignment: 1.0,
+        onAppFocused: _onHomeSectionFocused,
       ),
     );
   }
