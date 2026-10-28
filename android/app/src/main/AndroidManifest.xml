@@ -54,6 +54,11 @@
         <intent>
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
+        <!-- Arc TV: Home-button setup reports the state of these packages. -->
+        <package android:name="com.google.android.apps.tv.launcherx" />
+        <package android:name="com.google.android.tungsten.setupwraith" />
+        <package android:name="com.tcl.suspension" />
+        <package android:name="com.tcl.tv" />
     </queries>
 
     <application

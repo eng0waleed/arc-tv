@@ -120,8 +120,9 @@ String? cleanReleaseNotes(String? notes) {
 }
 
 class UpdateService {
-  static const String _owner = "meddouribadis";
-  static const String _repo = "arclauncher";
+  // Arc TV: updates come from the personal build repository.
+  static const String _owner = "eng0waleed";
+  static const String _repo = "arc-tv";
   final FLauncherChannel _fLauncherChannel;
 
   UpdateService({FLauncherChannel? fLauncherChannel})

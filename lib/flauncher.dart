@@ -282,19 +282,25 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
     if (favoriteApps.isEmpty && otherSections.isEmpty) return _emptyState(context);
 
     final watchNextSpace = watchNextBigPicture ? 385 : 410;
+    final showCategoryTitles = context.select<SettingsService, bool>((s) => s.showCategoryTitles);
+
+    // Arc TV: keep the first row of apps on screen without scrolling. Below the
+    // favourites dock we also reserve room for the first row of the next section.
+    final double bottomReserve = reserveWatchNextSpace
+        ? watchNextSpace.toDouble()
+        : _dockExtent(context, showAppNames: showAppNames) +
+            _firstSectionPeek(context, otherSections, showAppNames: showAppNames, showTitles: showCategoryTitles);
+    final double heroSpace = max(
+      0.0,
+      MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - kToolbarHeight - bottomReserve,
+    );
 
     return CustomScrollView(
       controller: _scrollController,
       slivers: [
         if (favoriteApps.isNotEmpty || showWatchNextSection) ...[
           SliverToBoxAdapter(
-            child: SizedBox(
-              height:
-                  MediaQuery.of(context).size.height -
-                  MediaQuery.of(context).padding.top -
-                  kToolbarHeight -
-                  (reserveWatchNextSpace ? watchNextSpace : 150),
-            ),
+            child: SizedBox(height: heroSpace),
           ),
           if (showWatchNextSection)
             SliverToBoxAdapter(
@@ -332,6 +338,46 @@ class _FLauncherState extends State<FLauncher> with WidgetsBindingObserver {
         SliverToBoxAdapter(child: SizedBox(height: _bottomScrollPadding(context, hasDock: favoriteApps.isNotEmpty))),
       ],
     );
+  }
+
+  /// Height of the favourites dock, including its outer padding.
+  double _dockExtent(BuildContext context, {required bool showAppNames}) {
+    final contentWidth = MediaQuery.of(context).size.width - 2 * kLauncherSectionHorizontalPadding;
+    final rowExtent = appCardRowExtentFromContentWidth(contentWidth) + (showAppNames ? kAppNameLabelHeight : 0);
+    return rowExtent + 10 /* dock vertical padding */ + _kDockOuterPadding.vertical;
+  }
+
+  /// Height needed to fully show the first row of the first section below the dock.
+  double _firstSectionPeek(
+    BuildContext context,
+    List<LauncherSection> sections, {
+    required bool showAppNames,
+    required bool showTitles,
+  }) {
+    final contentWidth = MediaQuery.of(context).size.width - 2 * kLauncherSectionHorizontalPadding;
+    double extent = 0;
+    for (final section in sections) {
+      if (section is LauncherSpacer) {
+        extent += section.height.toDouble();
+        continue;
+      }
+      final category = section as Category;
+      if (category.applications.isEmpty) continue;
+      if (showTitles) {
+        extent += 44; // title + its padding
+      }
+      if (category.type == CategoryType.grid) {
+        final cellWidth = contentWidth / category.columnsCount;
+        final aspectRatio = showAppNames
+            ? appCardGridAspectRatio(contentWidth, category.columnsCount)
+            : kAppCardAspectRatio;
+        extent += cellWidth / aspectRatio;
+      } else {
+        extent += category.rowHeight.toDouble() + (showAppNames ? kAppNameLabelHeight : 0);
+      }
+      return extent + 16;
+    }
+    return 0;
   }
 
   double _bottomScrollPadding(BuildContext context, {required bool hasDock}) {

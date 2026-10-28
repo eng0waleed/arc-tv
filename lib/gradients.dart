@@ -84,6 +84,18 @@ mixin FLauncherGradients {
     ),
   );
 
+  // Arc TV: deep night-blue default that lets the gold prayer accents stand out.
+  static final arcNight = FLauncherGradient(
+    "a7c5f0e2-3b1d-4c8e-9f60-0d2b8e4a7c11",
+    "Arc Night",
+    const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [Color(0xFF0D1524), Color(0xFF17233B), Color(0xFF2B2232)],
+      stops: [0, 0.55, 1],
+    ),
+  );
+
   static final pitchBlack = FLauncherGradient(
     "00000000-0000-0000-0000-000000000000",
     "Pitch Black",
@@ -91,6 +103,7 @@ mixin FLauncherGradients {
   );
 
   static List<FLauncherGradient> get all => [
+        arcNight,
         pitchBlack,
         greatWhale,
         viciousStance,

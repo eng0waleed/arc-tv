@@ -60,7 +60,8 @@ class LauncherState extends ChangeNotifier
     LauncherState launcherState = context.read<LauncherState>();
     SettingsService settingsService = context.read<SettingsService>();
 
-    if (kDebugMode || launcherState.isDefaultLauncher) {
+    // Arc TV: once Arc has been set up as the Home app, Back never leaves Arc.
+    if (kDebugMode || launcherState.isDefaultLauncher || settingsService.kioskMode) {
       launcherState.refresh(appsService);
       String action = settingsService.backButtonAction;
 

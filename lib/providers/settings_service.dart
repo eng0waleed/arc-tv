@@ -55,6 +55,8 @@ const String _dockDarkBackground = "dock_dark_background";
 const String _dockShadowEnabled = "dock_shadow_enabled";
 const String _showFocusBorders = "show_focus_borders";
 const String _focusBorderThickness = "focus_border_thickness";
+// Arc TV: set once Arc has been made the TV's Home app, so Back never leaves Arc.
+const String _arcTvKioskMode = "arc_tv_kiosk_mode";
 
 // Focus border thickness options (in dp)
 const double FOCUS_BORDER_THIN = 1.0;
@@ -100,6 +102,13 @@ class SettingsService extends ChangeNotifier {
       showFocusBorders && (_sharedPreferences.getBool(_appHighlightAnimationEnabledKey) ?? false);
 
   bool get appKeyClickEnabled => _sharedPreferences.getBool(_appKeyClickEnabledKey) ?? true;
+
+  bool get kioskMode => _sharedPreferences.getBool(_arcTvKioskMode) ?? false;
+
+  Future<void> setKioskMode(bool value) async {
+    await _sharedPreferences.setBool(_arcTvKioskMode, value);
+    notifyListeners();
+  }
 
   bool get autoHideAppBarEnabled => _sharedPreferences.getBool(_autoHideAppBar) ?? false;
 

@@ -197,6 +197,9 @@ public class MainActivity extends FlutterActivity {
 
         new EventChannel(messenger, NETWORK_EVENT_CHANNEL).setStreamHandler(
                 new NetworkEventStreamHandler(this));
+
+        // Arc TV: Home-button (default launcher) setup through the TV's debugging service.
+        KioskChannel.register(this, messenger);
     }
 
     private List<Map<String, Serializable>> getApplications() {

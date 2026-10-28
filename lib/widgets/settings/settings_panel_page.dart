@@ -16,6 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:flauncher/kiosk/kiosk_page.dart';
+import 'package:flauncher/prayer/prayer_service.dart';
+import 'package:flauncher/prayer/prayer_settings_page.dart';
 import 'package:flauncher/providers/apps_service.dart';
 import 'package:flauncher/providers/update_service.dart';
 import 'package:flauncher/build_flags.dart';
@@ -38,6 +41,9 @@ class SettingsPanelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppLocalizations localizations = AppLocalizations.of(context)!;
+    final prayerStrings = context.select<PrayerService, bool>((p) => p.arabicNames)
+        ? (title: 'مواقيت الصلاة', home: 'زر الرئيسية (Home)')
+        : (title: 'Prayer times', home: 'Home button');
 
     return Column(
       children: [
@@ -47,8 +53,22 @@ class SettingsPanelPage extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: Column(
               children: [
+                // Arc TV
                 FocusableSettingsTile(
                   autofocus: true,
+                  showChevron: true,
+                  leading: const Icon(Icons.access_time_rounded),
+                  title: Text(prayerStrings.title, style: Theme.of(context).textTheme.bodyMedium),
+                  onPressed: () => Navigator.of(context).pushNamed(PrayerSettingsPage.routeName),
+                ),
+                FocusableSettingsTile(
+                  showChevron: true,
+                  leading: const Icon(Icons.home_rounded),
+                  title: Text(prayerStrings.home, style: Theme.of(context).textTheme.bodyMedium),
+                  onPressed: () => Navigator.of(context).pushNamed(KioskPage.routeName),
+                ),
+                const SettingsSectionDivider(),
+                FocusableSettingsTile(
                   showChevron: true,
                   leading: const Icon(Icons.apps),
                   title: Text(localizations.applications, style: Theme.of(context).textTheme.bodyMedium),

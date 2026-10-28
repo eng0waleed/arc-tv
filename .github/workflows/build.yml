@@ -58,13 +58,26 @@ jobs:
 
       - name: Prayer-time tests
         id: tests
+        continue-on-error: true
         run: |
           set -o pipefail
-          if ls test/prayer/*_test.dart >/dev/null 2>&1; then
-            flutter test test/prayer 2>&1 | tee ci-out/tests.txt
-          else
-            echo "no prayer tests yet" | tee ci-out/tests.txt
-          fi
+          flutter test test/prayer 2>&1 | tee ci-out/tests.txt
+
+      # Renders the real launcher screens at 1920x1080 (see test/screenshots).
+      - name: Screenshots
+        id: screens
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          sudo apt-get install -y -qq fonts-noto-core >/dev/null 2>&1 || true
+          ls /usr/share/fonts/truetype/noto/ | grep -i arabic > ci-out/arabic-fonts.txt || true
+          flutter test --update-goldens test/screenshots 2>&1 | tee ci-out/screens.txt
+      - name: Collect screenshots
+        if: always()
+        run: |
+          mkdir -p ci-out/screens
+          cp test/screenshots/goldens/*.png ci-out/screens/ 2>/dev/null || true
+          ls -la ci-out/screens
 
       # A stable signing key lets every new build install over the previous one.
       # The key is generated here on the first run, encrypted with the repository
@@ -123,6 +136,7 @@ jobs:
           BUILD_NAME="1.2.0-tv.${{ github.run_number }}"
           echo "BUILD_NAME=$BUILD_NAME" >> "$GITHUB_ENV"
           flutter build apk --release --flavor github \
+            --dart-define=ENABLE_SELF_UPDATER=true \
             --build-number=$BUILD_NUMBER --build-name=$BUILD_NAME 2>&1 | tee ci-out/build.txt
           mkdir -p dist
           APK=$(find build/app/outputs -name 'arc-launcher-universal-release.apk' | head -n 1)
@@ -133,10 +147,10 @@ jobs:
           sha256sum dist/*.apk | tee ci-out/sha256.txt
 
       - name: Publish release
-        if: steps.build.outcome == 'success' && steps.signing.outputs.signed == 'true' && !contains(github.event.head_commit.message, '[no-release]')
+        if: steps.build.outcome == 'success' && steps.tests.outcome == 'success' && steps.signing.outputs.signed == 'true' && !contains(github.event.head_commit.message, '[no-release]')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: tv-${{ github.run_number }}
+          tag_name: ${{ env.BUILD_NAME }}
           name: Arc TV ${{ env.BUILD_NAME }}
           make_latest: true
           body: |
@@ -156,6 +170,7 @@ jobs:
             echo "pub=${{ steps.pub.outcome }}"
             echo "analyze=${{ steps.analyze.outcome }}"
             echo "tests=${{ steps.tests.outcome }}"
+            echo "screens=${{ steps.screens.outcome }}"
             echo "build=${{ steps.build.outcome }}"
           } > status.txt
           # Keep logs small enough to read: last 400 lines of the build log.

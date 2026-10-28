@@ -1,3 +1,5 @@
+import 'package:flauncher/prayer/prayer_pill.dart';
+import 'package:flauncher/prayer/prayer_service.dart';
 import 'package:flauncher/widgets/settings/settings_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,21 +29,32 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
 {
   bool focused = false;
   late FocusNode _settingsFocusNode;
+  // Arc TV: the prayer pill in the centre of the bar.
+  late FocusNode _prayerFocusNode;
 
   @override
   void initState() {
     super.initState();
     _settingsFocusNode = FocusNode();
+    _prayerFocusNode = FocusNode(debugLabel: 'prayer-pill');
   }
 
   @override
   void dispose() {
     _settingsFocusNode.dispose();
+    _prayerFocusNode.dispose();
     super.dispose();
   }
 
+  /// Pressing Up from the first row lands on the prayer pill (when shown),
+  /// otherwise on the settings button.
   void focusSettings() {
-    _settingsFocusNode.requestFocus();
+    final prayerShown = context.read<PrayerService>().enabled;
+    if (prayerShown && _prayerFocusNode.context != null && _prayerFocusNode.canRequestFocus) {
+      _prayerFocusNode.requestFocus();
+    } else {
+      _settingsFocusNode.requestFocus();
+    }
   }
 
   @override
@@ -89,7 +102,10 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
         );
       },
       child: RepaintBoundary(
-        child: AppBar(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+        AppBar(
           elevation: 0,
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
@@ -191,8 +207,15 @@ class FocusAwareAppBarState extends State<FocusAwareAppBar>
             ),
           ],
         ),
+            // Arc TV: prayer times pill, centred in the top bar.
+            Selector<PrayerService, bool>(
+              selector: (_, prayer) => prayer.enabled,
+              builder: (context, enabled, _) =>
+                  enabled ? PrayerPill(focusNode: _prayerFocusNode) : const SizedBox.shrink(),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

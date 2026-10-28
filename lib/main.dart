@@ -27,6 +27,7 @@ import 'package:flauncher/providers/settings_service.dart';
 import 'package:flauncher/providers/brightness_service.dart';
 import 'package:flauncher/providers/wallpaper_service.dart';
 import 'package:flauncher/providers/watch_next_service.dart';
+import 'package:flauncher/prayer/prayer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -65,6 +66,11 @@ Future<void> main() async {
               final settingsService = Provider.of<SettingsService>(context, listen: false);
               return WatchNextService(fLauncherChannel, settingsService: settingsService);
             },
+            lazy: false
+        ),
+        // Arc TV: prayer times
+        ChangeNotifierProvider(
+            create: (_) => PrayerService(sharedPreferences),
             lazy: false
         ),
       ],

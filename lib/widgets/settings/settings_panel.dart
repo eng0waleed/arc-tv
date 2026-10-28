@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:flauncher/kiosk/kiosk_page.dart';
+import 'package:flauncher/prayer/prayer_settings_page.dart';
 import 'package:flauncher/widgets/side_panel_dialog.dart';
 import 'package:flauncher/widgets/settings/applications_panel_page.dart';
 import 'package:flauncher/widgets/settings/launcher_sections_panel_page.dart';
@@ -139,6 +141,13 @@ class _SettingsPanelState extends State<SettingsPanel> {
                       return _FastPageRoute(builder: (_) => AccentColorPage());
                     case BrightnessSettingsPage.routeName:
                       return _FastPageRoute(builder: (_) => BrightnessSettingsPage());
+                    // Arc TV pages
+                    case PrayerSettingsPage.routeName:
+                      return _FastPageRoute(builder: (_) => const PrayerSettingsPage());
+                    case PrayerCityPage.routeName:
+                      return _FastPageRoute(builder: (_) => const PrayerCityPage());
+                    case KioskPage.routeName:
+                      return _FastPageRoute(builder: (_) => const KioskPage());
                     case AppDetailsPage.routeName:
                       return _FastPageRoute(builder: (_) => AppDetailsPage(application: settings.arguments as App));
                     default:
